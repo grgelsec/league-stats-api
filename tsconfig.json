@@ -10,6 +10,10 @@
     "module": "nodenext",
     "target": "esnext",
     "types": ["node"],
+    "paths": {
+      "@types": ["./src/types.ts"],
+      "@services/*": ["./src/services/*"]
+    },
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],
