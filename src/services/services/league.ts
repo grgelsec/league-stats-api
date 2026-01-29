@@ -1,9 +1,10 @@
 import "dotenv/config";
-import type { AccountDto, region } from "@types";
+import type { AccountDto, region, MatchDto } from "@types";
 class RiotService {
   private apiKey: string;
   private region: string;
   public account: AccountService;
+  public match: MatchService;
 
   constructor(apiKey: string, region: string) {
     if (!apiKey) {
@@ -14,6 +15,7 @@ class RiotService {
     this.region = region;
 
     this.account = new AccountService(this.request.bind(this));
+    this.match = new MatchService(this.request.bind(this));
   }
 
   private get baseURL(): string {
@@ -22,7 +24,7 @@ class RiotService {
 
   private async request<T>(endpoint: string): Promise<T> {
     const res = await fetch(`${this.baseURL}${endpoint}`, {
-      headers: { "XS-Riot-Token": this.apiKey },
+      headers: { "X-Riot-Token": this.apiKey },
     });
 
     if (!res.ok) {
@@ -43,9 +45,7 @@ class AccountService {
   }
 
   async getSummonerByPuuid(puuid: string) {
-    if (!puuid) {
-      throw new Error(`Missing player unique user id (puuid).`);
-    }
+    if (!puuid) throw new Error(`Missing player unique user id (puuid).`);
 
     return this.request<AccountDto>(
       `/riot/account/v1/accounts/by-puuid/${encodeURIComponent(puuid)}`,
@@ -70,11 +70,39 @@ class AccountService {
   }
 }
 
-// const RIOT_API_KEY = process.env.RIOT_API_KEY;
+class MatchService {
+  private request: <T>(endpoint: string) => Promise<T>;
 
-// const leage = new RiotService(RIOT_API_KEY!, "americas");
+  constructor(request: <T>(endpoint: string) => Promise<T>) {
+    this.request = request;
+  }
 
-// leage.getSummonerByRiotId("Georgie#EZLL");
-// leage.getSummonerByPuuid(
-//   "UPDmamHMSP2-38FGcerju-z3mBbI2Z6Ti0-64gwd9P6vJ7OyEuN0vpXrXMeDOJNGrGlJY-9hte98Mw",
-// );
+  async getMatchIdsByPuuid(puuid: string) {
+    if (!puuid) throw new Error(`Missing player unique user id (puuid).`);
+
+    return this.request<Array<string>>(
+      `/lol/match/v5/matches/by-puuid/${encodeURIComponent(puuid)}/ids`,
+    );
+  }
+
+  async getMatchByMatchId(matchId: string) {
+    if (!matchId) throw new Error("Missing match id (matchId");
+
+    return this.request<MatchDto>(
+      `/lol/match/v5/matches/${encodeURI(matchId)}`,
+    );
+  }
+}
+
+const RIOT_API_KEY = process.env.RIOT_API_KEY;
+
+const league = new RiotService(RIOT_API_KEY!, "americas");
+
+league.account.getSummonerByRiotId("Georgie#EZLL");
+league.account.getSummonerByPuuid(
+  "UPDmamHMSP2-38FGcerju-z3mBbI2Z6Ti0-64gwd9P6vJ7OyEuN0vpXrXMeDOJNGrGlJY-9hte98Mw",
+);
+league.match.getMatchIdsByPuuid(
+  "UPDmamHMSP2-38FGcerju-z3mBbI2Z6Ti0-64gwd9P6vJ7OyEuN0vpXrXMeDOJNGrGlJY-9hte98Mw",
+);
+league.match.getMatchByMatchId("NA1_5477102812");
