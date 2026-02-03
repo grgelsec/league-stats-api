@@ -6,7 +6,7 @@ import type {
   RiotMatchDto,
   FetchOptions,
 } from "@types";
-class RiotService {
+export class RiotService {
   private apiKey: string;
   private region: string;
   public account: AccountService;
@@ -60,7 +60,10 @@ class RiotService {
         //Clear timrout timer, call succeeded
         clearTimeout(timeoutId);
 
-        return (await res.json()) as T;
+        const data = (await res.json()) as T;
+        console.log(data);
+
+        return data;
       } catch (error) {
         //Ensure the error caught is an error, if not then
         const lastError =
