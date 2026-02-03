@@ -100,7 +100,6 @@ class AccountService {
   }
 
   async getSummonerByRiotId(riotId: string) {
-    console.log(riotId);
     if (!riotId || !riotId.includes("#")) {
       throw new Error(`RiotId not in correct format.`);
     }
@@ -110,7 +109,6 @@ class AccountService {
     if (!name || !tag) {
       throw new Error("invalid RiotId");
     }
-    console.log(name, tag);
 
     return this.request<AccountDto>(
       `/riot/account/v1/accounts/by-riot-id/${encodeURIComponent(name)}/${encodeURIComponent(tag)}`,

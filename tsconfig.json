@@ -14,6 +14,7 @@
       "@types": ["./src/types.ts"],
       "@services/*": ["./src/services/*"],
       "@routes": ["./src/routes/index.ts"],
+      "@middleware": ["./src/middleware/index.ts"],
     },
     // For nodejs:
     // "lib": ["esnext"],
