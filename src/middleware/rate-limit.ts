@@ -10,6 +10,7 @@ const windowSize = 20000;
 let requestCount = 0;
 let lastRequestTime = 0;
 
+//Rate limiting with fixed window, currWindow calculated on each request. If maxRequests is hit while window size is small, error is thrown.
 export const rateLimit = (req: Request, res: Response, next: NextFunction) => {
   const requestTime = Date.now();
   const currWindow = requestTime - lastRequestTime;
@@ -25,7 +26,6 @@ export const rateLimit = (req: Request, res: Response, next: NextFunction) => {
 
   if (currWindow > windowSize) {
     requestCount = 0;
-    lastRequestTime = Date.now();
   }
 
   console.log("Request recieved!");
