@@ -5,6 +5,13 @@ export interface FetchOptions extends RequestInit {
   retries?: number;
 }
 
+export interface SummonerDto {
+  puuid: string;
+  profileIconId: number;
+  revisionDate: number;
+  summonerLevel: number;
+}
+
 export interface AccountDto {
   puuid: string;
   gameName: string;

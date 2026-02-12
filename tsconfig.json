@@ -15,6 +15,7 @@
       "@services/*": ["./src/services/*"],
       "@routes": ["./src/routes/index.ts"],
       "@middleware": ["./src/middleware/index.ts"],
+      "@queries": ["./src/db/queries.ts"],
     },
     // For nodejs:
     // "lib": ["esnext"],
