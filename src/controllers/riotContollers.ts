@@ -1,5 +1,4 @@
 import express, { type Request, type Response } from "express";
-import { RiotService } from "@services/riot.js";
 import "dotenv/config";
 import type { AccountDto } from "@types";
 
