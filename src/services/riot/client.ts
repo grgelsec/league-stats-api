@@ -1,15 +1,20 @@
 import "dotenv/config";
 import type { AccountDto, RiotMatchDto, FetchOptions, region } from "@types";
-import { validRegion } from "../../utils/valid-region.js";
+import { validPlatformRegion, validRegion } from "../../utils/valid-region.js";
 
 const RIOT_API_KEY = process.env.RIOT_API_KEY!;
-const REGION = process.env.RIOT_REGION || "americas";
-const BASE_URL = `https://${REGION}.api.riotgames.com`;
+let REGION = process.env.RIOT_REGION || "americas";
+let BASE_URL = `https://${REGION}.api.riotgames.com`;
 
 export async function request<T>(endpoint: string, options: FetchOptions = {}) {
   const { timeout = 5000, retries = 2, ...fetchOpions } = options;
 
   let lastError: Error | null = null;
+
+  if (options.region && validPlatformRegion(options.region)) {
+    REGION = options.region;
+    BASE_URL = `https://${REGION}.api.riotgames.com`;
+  }
 
   for (let attempt = 1; attempt <= retries; attempt++) {
     const contoller = new AbortController();

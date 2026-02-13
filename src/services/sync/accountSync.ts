@@ -7,13 +7,18 @@ export async function syncPlayer(riotId: string) {
 
   const accountData = await getAccountByRiotId(riotId);
 
-  if (!accountData.puuid)
-    throw new Error("Puuid was not returned by getAccountByRiotId!");
-
-  console.log("account data: ", accountData);
+  if (!accountData)
+    throw new Error("data was not returned by getAccountByRiotId!");
 
   const summonerData = await getSummonerByPuuid(accountData.puuid);
-  console.log("summoner data: ", summonerData);
+
+  try {
+    await insertPlayer(accountData, summonerData);
+  } catch (error) {
+    throw new Error(
+      `Failed to insert player ${accountData.puuid}: ${(error as Error).message}`,
+    );
+  }
 
   return await insertPlayer(accountData, summonerData);
 }
