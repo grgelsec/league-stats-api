@@ -13,14 +13,16 @@ export async function syncPlayer(riotId: string) {
   const summonerData = await getSummonerByPuuid(accountData.puuid);
 
   try {
-    await insertPlayer(accountData, summonerData);
+    await insertPlayer(
+      accountData.puuid,
+      `${accountData.gameName}#${accountData.tagLine}`,
+      summonerData.summonerLevel,
+    );
   } catch (error) {
     throw new Error(
       `Failed to insert player ${accountData.puuid}: ${(error as Error).message}`,
     );
   }
-
-  return await insertPlayer(accountData, summonerData);
 }
 
 syncPlayer("Georgie#EZLL");

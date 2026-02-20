@@ -380,10 +380,42 @@ export interface PerkStyleSelectionDto {
   var3: number;
 }
 
-export interface TeamDto {
-  bans: BanDto[];
-  objectives: ObjectivesDto;
+export interface MatchTeamDto {
+  matchId: string;
   teamId: number;
+  win: boolean;
+  objectives: {
+    baron: {
+      first: boolean;
+      kills: number;
+    };
+    dragon: {
+      first: boolean;
+      kills: number;
+    };
+    herald: {
+      first: boolean;
+      kills: number;
+    };
+    tower: {
+      first: boolean;
+      kills: number;
+    };
+    inhibitor: {
+      first: boolean;
+      kills: number;
+    };
+    champion: {
+      first: boolean;
+      kills: number;
+    };
+  };
+}
+
+export interface TeamDto {
+  matchId: string;
+  teamId: number;
+  objectives: ObjectivesDto;
   win: boolean;
 }
 
@@ -442,7 +474,6 @@ export interface RiotParticipantDto {
 
   // Damage
   totalDamageDealtToChampions: number;
-  totalDamageTaken: number;
 
   // Vision
   visionScore: number;
@@ -450,14 +481,15 @@ export interface RiotParticipantDto {
   controlWardsPlaced: number;
   wardsKilled: number;
 
-  // Objectives (from challenges)
-  challenges?: {
-    dragonTakedowns?: number;
-    baronTakedowns?: number;
-    turretTakedowns?: number;
-    laneMinionsFirst10Minutes?: number;
-    goldPerMinute?: number;
-  };
+  item_0: number;
+  item_1: number;
+  item_2: number;
+  item_3: number;
+  item_4: number;
+  item_5: number;
+  item_6: number;
+
+  timePlayed: number;
 }
 
 export interface RiotTeamDto {
