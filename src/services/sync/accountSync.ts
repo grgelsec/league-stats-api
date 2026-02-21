@@ -24,5 +24,3 @@ export async function syncPlayer(riotId: string) {
     );
   }
 }
-
-syncPlayer("Georgie#EZLL");

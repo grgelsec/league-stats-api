@@ -6,7 +6,6 @@ import type {
   RiotMatchDto,
   RiotParticipantDto,
 } from "@types";
-import { syncPlayer } from "./accountSync.js";
 
 export const syncMatch = async (matchid: string) => {
   if (!matchid) throw new Error("missing matchid!");
@@ -29,7 +28,7 @@ export const syncParticipants = async (matchid: string) => {
   const participants: ParticipantDto[] = match.info.participants;
   const participantsCleaned: RiotParticipantDto[] = [];
 
-  // upserts players if they're not already in db.
+  // upserts players if they're not already in db. this repeats queries which i am not sure is good. Might change this flow.
   await Promise.all(
     participants.map((participant) => {
       insertPlayer(
@@ -39,6 +38,8 @@ export const syncParticipants = async (matchid: string) => {
       );
     }),
   );
+
+  await syncMatch(matchid);
 
   participants.map((participant) =>
     participantsCleaned.push({
@@ -82,5 +83,3 @@ export const syncParticipants = async (matchid: string) => {
     );
   }
 };
-
-syncParticipants("NA1_5493139552");
