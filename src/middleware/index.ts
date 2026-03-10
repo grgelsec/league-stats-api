@@ -1,4 +1,4 @@
 export * from "./rate-limit.js";
 export * from "./request-time.js";
 export * from "./backpressure.js";
-export * from "./error.js";
+export * from "./errorHandler.js";

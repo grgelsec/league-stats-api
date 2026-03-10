@@ -1,5 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
-
+import { redis } from "@redis";
 //TODO: Re-implment with sliding window
 
 //Rate-Limit constants

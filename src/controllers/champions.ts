@@ -1,8 +1,15 @@
 import type { Request, Response } from "express";
 import { championBanRate } from "../services/hexcore/champions.js";
+import { BadRequestError, NotFoundError } from "@error";
 
 export const getChampionBanRate = async (req: Request, res: Response) => {
-  const data = await championBanRate(req.params.championName as string);
+  const championName = req.params.championName as string;
 
-  return res.json(data);
+  if (!championBanRate) throw new BadRequestError("Champion name is required");
+
+  const banrate = await championBanRate(championName);
+
+  if (!banrate) throw new NotFoundError("Banrate not found");
+
+  return res.json(banrate);
 };
