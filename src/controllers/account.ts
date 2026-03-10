@@ -2,11 +2,18 @@ import express, { type Request, type Response } from "express";
 import "dotenv/config";
 import type { AccountDto } from "@types";
 import { getAccountByRiotId } from "@services/riot";
+import { BadRequestError, NotFoundError } from "@error";
 
 export const getPlayerId = async (req: Request, res: Response) => {
-  const data: AccountDto = await getAccountByRiotId(
-    req.params.riotId as string,
-  );
+  const riotId = req.params.riotId as string;
 
-  return res.json(data);
+  if (!riotId) {
+    throw new BadRequestError("Riot ID is required");
+  }
+
+  const account: AccountDto = await getAccountByRiotId(riotId);
+
+  if (!account) throw new NotFoundError();
+
+  return res.json(account);
 };

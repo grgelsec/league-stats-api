@@ -20,7 +20,8 @@
       "@queries": ["./src/db/queries.ts"],
       "@utils": ["./src/utils/index.ts"],
       "@controllers": ["./src/controllers/index.ts"],
-      "@data": ["./src/data/index.ts"]
+      "@data": ["./src/data/index.ts"],
+      "@error": ["./src/errors/index.ts"],
     },
     // For nodejs:
     // "lib": ["esnext"],
@@ -52,6 +53,6 @@
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
     "skipLibCheck": true,
-    "resolveJsonModule": true
-  }
+    "resolveJsonModule": true,
+  },
 }
