@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { redis } from "@redis";
+import { AuthorizationError, RateLimitError } from "@error";
 //TODO: Re-implment with sliding window
 
 export interface SlidingWindowCounterConfig {
@@ -41,7 +42,7 @@ export const slidingWindow = async (
 
   const weightedPrev = prevCount * (1 - elapsed);
 
-  const currCount = parseInt((await redis.get(prevKey)) ?? "0", 10);
+  const currCount = parseInt((await redis.get(currKey)) ?? "0", 10);
 
   const estimatedCount = weightedPrev + currCount;
 
@@ -69,19 +70,36 @@ export const slidingWindow = async (
   const newEstimate = weightedPrev + newCount;
   const remaining = Math.max(0, Math.floor(maxRequests - newEstimate));
 
-  console.log({
-    allowed: true,
-    remaining: remaining,
-    limit: maxRequests,
-    retryAfter: null,
-  });
-
   return {
     allowed: true,
     remaining: remaining,
     limit: maxRequests,
     retryAfter: null,
   };
+};
+
+export const rateLimiter = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const userIp = req.ip;
+
+  if (!userIp)
+    throw new AuthorizationError(
+      "IP blocking is suspected, sure IP address is not restricted.",
+    );
+
+  const rateLimitRes = await slidingWindow(userIp);
+  console.log(rateLimitRes);
+
+  if (!rateLimitRes.allowed) {
+    throw new RateLimitError(
+      `Too many requests, please try in ${rateLimitRes.retryAfter} seconds.`,
+    );
+  }
+
+  next();
 };
 
 // //Rate-Limit constants
