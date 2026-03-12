@@ -69,6 +69,13 @@ export const slidingWindow = async (
   const newEstimate = weightedPrev + newCount;
   const remaining = Math.max(0, Math.floor(maxRequests - newEstimate));
 
+  console.log({
+    allowed: true,
+    remaining: remaining,
+    limit: maxRequests,
+    retryAfter: null,
+  });
+
   return {
     allowed: true,
     remaining: remaining,
@@ -77,40 +84,40 @@ export const slidingWindow = async (
   };
 };
 
-//Rate-Limit constants
-const maxRequests = 5;
-const windowSize = 20000;
+// //Rate-Limit constants
+// const maxRequests = 5;
+// const windowSize = 20000;
 
-//Tracking
-let requestCount = 0;
-let lastRequestTime = 0;
+// //Tracking
+// let requestCount = 0;
+// let lastRequestTime = 0;
 
-//Rate limiting with fixed window, currWindow calculated on each request. If maxRequests is hit while window size is small, error is thrown.
-export const rateLimit = (req: Request, res: Response, next: NextFunction) => {
-  const requestTime = Date.now();
-  const currWindow = requestTime - lastRequestTime;
+// //Rate limiting with fixed window, currWindow calculated on each request. If maxRequests is hit while window size is small, error is thrown.
+// export const rateLimit = (req: Request, res: Response, next: NextFunction) => {
+//   const requestTime = Date.now();
+//   const currWindow = requestTime - lastRequestTime;
 
-  //Request passes through if requestInterval
-  if (requestCount >= maxRequests && currWindow <= windowSize) {
-    res.status(429).json({
-      success: "false",
-      error: "Rate limit exceeded",
-    });
-    return console.log("Rate limit exceeded!");
-  }
+//   //Request passes through if requestInterval
+//   if (requestCount >= maxRequests && currWindow <= windowSize) {
+//     res.status(429).json({
+//       success: "false",
+//       error: "Rate limit exceeded",
+//     });
+//     return console.log("Rate limit exceeded!");
+//   }
 
-  if (currWindow > windowSize) {
-    requestCount = 0;
-  }
+//   if (currWindow > windowSize) {
+//     requestCount = 0;
+//   }
 
-  console.log("Request recieved!");
-  requestCount += 1;
-  lastRequestTime = requestTime;
+//   console.log("Request recieved!");
+//   requestCount += 1;
+//   lastRequestTime = requestTime;
 
-  //TEST
-  console.log(
-    `Rate Limit Metrics: \n Request Count: ${requestCount} \n Request time: ${requestTime} \n Time From Last Request: ${currWindow}`,
-  );
+//   //TEST
+//   console.log(
+//     `Rate Limit Metrics: \n Request Count: ${requestCount} \n Request time: ${requestTime} \n Time From Last Request: ${currWindow}`,
+//   );
 
-  next();
-};
+//   next();
+// };
