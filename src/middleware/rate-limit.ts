@@ -10,7 +10,7 @@ export interface SlidingWindowCounterConfig {
 export const DEFAULT_CONFIG: SlidingWindowCounterConfig = {
   maxRequests: 10,
   windowSeconds: 10,
-}
+};
 
 export interface RateLimitResult {
   allowed: boolean;
@@ -20,7 +20,10 @@ export interface RateLimitResult {
   delay?: number | null;
 }
 
-export const slidingWindow = async (key: string, config: SlidingWindowCounterConfig = DEFAULT_CONFIG): Promise<RateLimitResult> {
+export const slidingWindow = async (
+  key: string,
+  config: SlidingWindowCounterConfig = DEFAULT_CONFIG,
+): Promise<RateLimitResult> => {
   const { maxRequests, windowSeconds } = config;
 
   const now = Math.floor(Date.now() / 1000);
@@ -28,14 +31,51 @@ export const slidingWindow = async (key: string, config: SlidingWindowCounterCon
   const previousWindow = currentWindow - 1;
 
   const currKey = `${key}:${currentWindow}`;
-  const prevKey = `${key}:${currentWindow}`;
+  const prevKey = `${key}:${previousWindow}`;
 
+  // "weight" factor, ratio from 0 to 1 representing how far into the current window you are
+  // 3 seconds into a 10 second window, elapsed is 0.3
   const elapsed = (now % windowSeconds) / windowSeconds;
 
-  const prevCount = parseInt((await redis.get(prevKey)) ?? "0", 10)
+  const prevCount = parseInt((await redis.get(prevKey)) ?? "0", 10);
 
-}
+  const weightedPrev = prevCount * (1 - elapsed);
 
+  const currCount = parseInt((await redis.get(prevKey)) ?? "0", 10);
+
+  const estimatedCount = weightedPrev + currCount;
+
+  if (estimatedCount >= maxRequests) {
+    // calculate time left in current window
+    const retryAfter = Math.ceil(windowSeconds * (1 - elapsed));
+    return {
+      allowed: false,
+      remaining: 0,
+      limit: maxRequests,
+      retryAfter: Math.max(1, retryAfter),
+    };
+  }
+
+  const newCount = await redis.incr(currKey);
+  /*
+    - if this is the first incr for that key, sets the TTL to 2x windowSeconds
+    - TTL is 2x windowSeconds so the request count for that key persists across
+    - current window and next window. automatic cleanup after 2x seconds.
+  */
+  if (newCount === 1) {
+    await redis.expire(currKey, windowSeconds * 2);
+  }
+
+  const newEstimate = weightedPrev + newCount;
+  const remaining = Math.max(0, Math.floor(maxRequests - newEstimate));
+
+  return {
+    allowed: true,
+    remaining: remaining,
+    limit: maxRequests,
+    retryAfter: null,
+  };
+};
 
 //Rate-Limit constants
 const maxRequests = 5;
