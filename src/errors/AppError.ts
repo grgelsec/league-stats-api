@@ -48,3 +48,9 @@ export class AuthorizationError extends AppError {
     super(message, 403);
   }
 }
+
+export class RateLimitError extends AppError {
+  constructor(message = "Too Many Requests.") {
+    super(message, 429);
+  }
+}

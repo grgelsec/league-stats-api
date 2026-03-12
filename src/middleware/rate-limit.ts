@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { redis } from "@redis";
+import { AuthorizationError, RateLimitError } from "@error";
 //TODO: Re-implment with sliding window
 
 export interface SlidingWindowCounterConfig {
@@ -41,7 +42,7 @@ export const slidingWindow = async (
 
   const weightedPrev = prevCount * (1 - elapsed);
 
-  const currCount = parseInt((await redis.get(prevKey)) ?? "0", 10);
+  const currCount = parseInt((await redis.get(currKey)) ?? "0", 10);
 
   const estimatedCount = weightedPrev + currCount;
 
@@ -77,40 +78,64 @@ export const slidingWindow = async (
   };
 };
 
-//Rate-Limit constants
-const maxRequests = 5;
-const windowSize = 20000;
+export const rateLimiter = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const userIp = req.ip;
 
-//Tracking
-let requestCount = 0;
-let lastRequestTime = 0;
+  if (!userIp)
+    throw new AuthorizationError(
+      "IP blocking is suspected, sure IP address is not restricted.",
+    );
 
-//Rate limiting with fixed window, currWindow calculated on each request. If maxRequests is hit while window size is small, error is thrown.
-export const rateLimit = (req: Request, res: Response, next: NextFunction) => {
-  const requestTime = Date.now();
-  const currWindow = requestTime - lastRequestTime;
+  const rateLimitRes = await slidingWindow(userIp);
+  console.log(rateLimitRes);
 
-  //Request passes through if requestInterval
-  if (requestCount >= maxRequests && currWindow <= windowSize) {
-    res.status(429).json({
-      success: "false",
-      error: "Rate limit exceeded",
-    });
-    return console.log("Rate limit exceeded!");
+  if (!rateLimitRes.allowed) {
+    throw new RateLimitError(
+      `Too many requests, please try in ${rateLimitRes.retryAfter} seconds.`,
+    );
   }
-
-  if (currWindow > windowSize) {
-    requestCount = 0;
-  }
-
-  console.log("Request recieved!");
-  requestCount += 1;
-  lastRequestTime = requestTime;
-
-  //TEST
-  console.log(
-    `Rate Limit Metrics: \n Request Count: ${requestCount} \n Request time: ${requestTime} \n Time From Last Request: ${currWindow}`,
-  );
 
   next();
 };
+
+// //Rate-Limit constants
+// const maxRequests = 5;
+// const windowSize = 20000;
+
+// //Tracking
+// let requestCount = 0;
+// let lastRequestTime = 0;
+
+// //Rate limiting with fixed window, currWindow calculated on each request. If maxRequests is hit while window size is small, error is thrown.
+// export const rateLimit = (req: Request, res: Response, next: NextFunction) => {
+//   const requestTime = Date.now();
+//   const currWindow = requestTime - lastRequestTime;
+
+//   //Request passes through if requestInterval
+//   if (requestCount >= maxRequests && currWindow <= windowSize) {
+//     res.status(429).json({
+//       success: "false",
+//       error: "Rate limit exceeded",
+//     });
+//     return console.log("Rate limit exceeded!");
+//   }
+
+//   if (currWindow > windowSize) {
+//     requestCount = 0;
+//   }
+
+//   console.log("Request recieved!");
+//   requestCount += 1;
+//   lastRequestTime = requestTime;
+
+//   //TEST
+//   console.log(
+//     `Rate Limit Metrics: \n Request Count: ${requestCount} \n Request time: ${requestTime} \n Time From Last Request: ${currWindow}`,
+//   );
+
+//   next();
+// };
