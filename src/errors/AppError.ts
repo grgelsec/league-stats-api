@@ -35,8 +35,16 @@ export class BadRequestError extends AppError {
   }
 }
 
-export class RateLimitError extends AppError {
-  constructor(message = "Rate Limit exceeded") {
-    super(message, 429);
+export class AuthenticationError extends AppError {
+  constructor(message = "Invalid or missing authentication credentials") {
+    super(message, 401);
+  }
+}
+
+export class AuthorizationError extends AppError {
+  constructor(
+    message = "Access denied. Lack required privileges to access requested resource.",
+  ) {
+    super(message, 403);
   }
 }

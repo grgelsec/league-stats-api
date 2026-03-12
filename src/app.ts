@@ -8,6 +8,8 @@ import { NotFoundError } from "@error";
 const app: Express = express();
 const port = 3000;
 
+app.set("trust proxy", true);
+
 // register middleware
 app.use(express.json());
 app.use(rateLimit);
