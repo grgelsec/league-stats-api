@@ -6,6 +6,7 @@ import type {
   RiotMatchDto,
   RiotParticipantDto,
 } from "@types";
+import { syncBans, syncTeams } from "./teamSync.js";
 
 export const syncMatch = async (matchid: string) => {
   if (!matchid) throw new Error("missing matchid!");
@@ -40,6 +41,8 @@ export const syncParticipants = async (matchid: string) => {
   );
 
   await syncMatch(matchid);
+  await syncTeams(matchid);
+  await syncBans(matchid);
 
   participants.map((participant) =>
     participantsCleaned.push({

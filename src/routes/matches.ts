@@ -3,4 +3,4 @@ import { getRecentMatches } from "@controllers";
 
 export const matchesRouter = Router();
 
-matchesRouter.get("/matches/:riotId/recent", getRecentMatches);
+matchesRouter.get("/matches/:riotId/recent{/:count}", getRecentMatches);
