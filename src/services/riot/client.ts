@@ -1,13 +1,13 @@
 import "dotenv/config";
-import type { AccountDto, RiotMatchDto, FetchOptions, region } from "@types";
-import { validPlatformRegion, validRegion } from "@utils";
+import type { FetchOptions } from "@types";
+import { validPlatformRegion } from "@utils";
 
 const RIOT_API_KEY = process.env.RIOT_API_KEY!;
 let REGION = process.env.RIOT_REGION || "americas";
 let BASE_URL = `https://${REGION}.api.riotgames.com`;
 
 export async function request<T>(endpoint: string, options: FetchOptions = {}) {
-  const { timeout = 5000, retries = 2, ...fetchOpions } = options;
+  const { timeout = 5000, retries = 2, ...fetchOptions } = options;
 
   let lastError: Error | null = null;
 
@@ -17,14 +17,14 @@ export async function request<T>(endpoint: string, options: FetchOptions = {}) {
   }
 
   for (let attempt = 1; attempt <= retries; attempt++) {
-    const contoller = new AbortController();
-    const timeoutId = setTimeout(() => contoller.abort(), timeout);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeout);
 
     try {
       const res = await fetch(`${BASE_URL}${endpoint}`, {
-        ...fetchOpions,
-        headers: { "X-Riot-Token": RIOT_API_KEY, ...fetchOpions.headers },
-        signal: contoller.signal,
+        ...fetchOptions,
+        headers: { "X-Riot-Token": RIOT_API_KEY, ...fetchOptions.headers },
+        signal: controller.signal,
       });
 
       if (!res.ok) {
