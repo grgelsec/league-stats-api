@@ -122,12 +122,12 @@ export const insertBans = async (
   );
 };
 
-export const getPuuidBySummonerName = async (riotId: string) => {
+export const getAccountBySummonerName = async (riotId: string) => {
   const result = await pool.query(
-    `SELECT puuid FROM players WHERE summoner_name = $1`,
+    `SELECT * FROM players WHERE summoner_name = $1`,
     [riotId],
   );
-  return result.rows[0]?.puuid || null;
+  return result.rows[0] || null;
 };
 
 export const getMissingMatchIds = async (matchIds: string[]) => {
@@ -142,7 +142,7 @@ export const getMissingMatchIds = async (matchIds: string[]) => {
 
 export const getPastNGames = async (puuid: string, count: number) => {
   const result = await pool.query(
-    `SELECT mp.* 
+    `SELECT mp.*
     FROM match_participants mp
     JOIN matches m ON mp.match_id = m.match_id
     WHERE mp.puuid = $1

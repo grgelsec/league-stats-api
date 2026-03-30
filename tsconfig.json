@@ -18,11 +18,12 @@
       "@routes": ["./src/routes/index.ts"],
       "@middleware": ["./src/middleware/index.ts"],
       "@queries": ["./src/db/queries.ts"],
+      "@db/types": ["./src/db/types.ts"],
       "@utils": ["./src/utils/index.ts"],
       "@controllers": ["./src/controllers/index.ts"],
       "@assets": ["./src/assets/index.ts"],
       "@error": ["./src/errors/index.ts"],
-      "@redis": ["./src/services/redis/index.ts"],
+      "@redis": ["./src/db/redis/index.ts"],
     },
     // For nodejs:
     // "lib": ["esnext"],
