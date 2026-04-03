@@ -6,6 +6,8 @@
   4. on cache miss, grab from db, set in redis and set result as db res
 */
 
+import type { Request, Response } from "express";
+
 const getHashKey = (_filter: Document) => {
   const crypto = require("node:crypto");
 
