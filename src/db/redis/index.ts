@@ -12,6 +12,7 @@ export const redis = new Redis(REDIS_URL, {
     if (err.message.includes("READONLY")) {
       return true;
     }
+    //reconnect and resend the failed command after reconnecting
     return 2;
   },
 });
