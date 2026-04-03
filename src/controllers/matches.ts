@@ -13,6 +13,7 @@ export const getRecentMatches = async (req: Request, res: Response) => {
   const result = await cacheAside<RiotParticipantDto[]>(
     returnRecentMatches,
     riotId,
+    60,
   );
 
   return res.json(result);

@@ -4,6 +4,7 @@ import { redis } from "@redis";
 export async function cacheAside<T>(
   fn: (requestParam: string) => Promise<T>,
   requestParam: string,
+  ttl: number,
 ) {
   let res: { data: T | null; isFromCache: boolean } = {
     data: null,
@@ -21,7 +22,7 @@ export async function cacheAside<T>(
     const result: T = await fn(requestParam);
 
     if (result) {
-      redis.set(hashkey, JSON.stringify(result), "EX", 60);
+      redis.set(hashkey, JSON.stringify(result), "EX", ttl);
     }
 
     res.data = result;
